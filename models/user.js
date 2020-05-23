@@ -8,7 +8,7 @@ const userSchema = new Schema({
     unique: true,
     maxLength: 64,
     minLength:3,
-    validate: [isEmail, 'Invalid email']
+    validate: [isEmail, 'invalid email']
   },
   username: {
     type: String,
