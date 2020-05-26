@@ -13,9 +13,8 @@ const login = async (req, res, next) => {
 		const isValidPassword = await verifyPassword(user.password, password);
 		if (!isValidPassword) throw new Exception('username or password incorrect');
 		delete user._doc.password;
-		const { avatarUrl } = user._doc;
 		const token = await generateAccessToken(
-			{ _id: user._id, username: user._doc.username, avatarUrl },
+			{ _id: user._id, username: user._doc.username },
 			env.JWT_SECRET_KEY,
 			'7d'
 		);
