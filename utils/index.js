@@ -24,11 +24,16 @@ const checkIsImage = (mimetype) => {
 	return acceptImageTypes.includes(mimetype);
 };
 
+const randomInRange = (start, end) => {
+	return Math.round(Math.random() * end - start) + start
+}
+
 module.exports = {
 	Exception,
 	hashPassword,
 	verifyPassword,
-	checkIsImage
+	checkIsImage,
+	randomInRange
 };
 
 // hashPassword('123123').then(res => console.log(res))
