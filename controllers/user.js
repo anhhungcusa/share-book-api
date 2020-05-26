@@ -1,4 +1,5 @@
 const User = require('./../models/user');
+const Giveaway = require('./../models/giveaway');
 const { Exception } = require('../utils');
 const { httpCodes } = require('../utils/constant');
 const isEmail = require('validator/lib/isEmail');
@@ -36,7 +37,24 @@ const getUserById = async (req, res, next) => {
 	}
 }
 
+const getGiveawaysOfUser = async (req, res, next) => {
+	try {
+		const {id}  = req.params
+		let {limit, skip} = req.body
+        limit = limit ? +limit : 5 
+        skip = skip ? +skip : 5 
+		if(!id) throw new Exception('invalid id')
+		const giveaways  = await Giveaway.find({byUser: id}, null, {limit, skip})
+			.populate('category')
+		if(!giveaways) throw new Exception('giveaway not found');
+		return res.status(httpCodes.OK).send({giveaways})
+	} catch (error) {
+		next(error)		
+	}
+}
+
 module.exports = {
 	registerUser,
-	getUserById
+	getUserById,
+	getGiveawaysOfUser
 }
