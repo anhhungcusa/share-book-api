@@ -1,4 +1,4 @@
-const User = require('../models/user.model');
+const User = require('./../models/user');
 const { Exception } = require('../utils');
 const { httpCodes } = require('../utils/constant');
 const isEmail = require('validator/lib/isEmail');
@@ -24,6 +24,19 @@ const registerUser = async (req, res, next) => {
 	}
 };
 
+const getUserById = async (req, res, next) => {
+	try {
+		const {id} = req.params
+		if(!id) throw new Exception('invalid id')
+		const user = await User.findById(id, 'email username')
+		if(!user) throw new Exception('user not found')
+		return res.status(httpCodes.OK).send({user})
+	} catch (error) {
+		next(error)
+	}
+}
+
 module.exports = {
-    registerUser
+	registerUser,
+	getUserById
 }
