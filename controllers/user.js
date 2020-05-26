@@ -1,7 +1,7 @@
 const User = require('../models/user.model');
 const { Exception } = require('../utils');
-const isEmail = require('validator/lib/isEmail');
 const { httpCodes } = require('../utils/constant');
+const isEmail = require('validator/lib/isEmail');
 
 const registerUser = async (req, res, next) => {
 	try {
