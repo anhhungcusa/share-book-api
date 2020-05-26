@@ -76,4 +76,5 @@ const giveawaySchema = new Schema({
 	}
 });
 
+module.exports.giveawayResultSchema = giveawayResultSchema
 module.exports = model('Giveaway', giveawaySchema);
