@@ -13,7 +13,7 @@ const giveawayRegistrationSchema =  new Schema({
         type: Number,
         required: true
     },
-    giveAwayId: {
+    giveawayId: {
         type: Schema.Types.ObjectId,
         required: true,
         index: true
