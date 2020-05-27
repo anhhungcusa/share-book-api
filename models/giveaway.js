@@ -1,4 +1,5 @@
 const { Schema, model } = require('mongoose');
+const isEmail = require('validator/lib/isEmail')
 
 const giveawayResultSchema = new Schema({
 	winnerEmail: {

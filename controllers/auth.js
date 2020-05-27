@@ -1,6 +1,6 @@
 const { generateAccessToken } = require('../utils/jwt');
 const { verifyPassword, Exception } = require('../utils');
-const User = require('../models/user.model');
+const User = require('../models/user');
 const { env } = require('../config/globals');
 const { httpCodes } = require('../utils/constant');
 
