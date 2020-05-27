@@ -94,6 +94,19 @@ const getActiveGiveaways = async (req, res, next) => {
         next(error)
     }
 }
+
+const getRegistrationsOfGiveaway = async (req, res, next) => {
+    try {
+        const {id} = req.params
+        if(!id) throw new Exception('invalid id')
+        const registrations = await GiveawayRegistration.find({giveawayId: id})
+        if(!registrations) throw new Exception('registration not found')
+        return res.status(httpCodes.OK).send({registrations})
+    } catch (error) {
+        next(error)
+    }
+}
+
 const removeGiveaway = async (req, res, next) => {
     try {
         const {id} = req.params
@@ -106,10 +119,14 @@ const removeGiveaway = async (req, res, next) => {
     }
 }
 
+
+
 module.exports = {
     addGiveaway,
     registerReceiveGiveaway,
     updateWinnerInfo,
     startGiveaway,
-    getActiveGiveaways
+    getActiveGiveaways,
+    removeGiveaway,
+    getRegistrationsOfGiveaway
 }
