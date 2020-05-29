@@ -25,6 +25,7 @@ const checkIsImage = (mimetype) => {
 };
 
 const randomInRange = (start, end) => {
+	if(start >=end) return start
 	return Math.round(Math.random() * end - start) + start
 }
 
