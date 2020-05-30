@@ -71,12 +71,14 @@ const updateWinnerInfo = async (req, res, next) => {
             throw new Exception('invalid info')
         const giveaway = await Giveaway.findById(id)
         if(!giveaway) 
-            throw new Exception('giveaway not found')
+            throw new Exception('giveaway not found', httpCodes.NOT_FOUND)
+        if(giveaway.result.winnerInfo) 
+            throw new Exception('winner info registered')
         if(giveaway.result.winnerEmail !== email) 
             throw new Exception('invalid email')
         giveaway.result.winnerInfo = {fullname, address, phone}
         await giveaway.save()
-        return res.status(httpCodes.OK).send({message: 'update winner info successful'})
+        return res.status(httpCodes.OK).send({message: 'register winner info successful'})
     } catch (error) {
         next(error)
     }
@@ -84,7 +86,7 @@ const updateWinnerInfo = async (req, res, next) => {
 
 const getGiveaways = async (req, res, next) => {
     try {
-        let {limit, skip, categoryId, ended} = req.body
+        let {limit, skip, categoryId, ended} = req.params
         limit = limit ? +limit : 5 
         skip = skip ? +skip : 5 
         let query = {result: {$exists: ended ? true : false}}
@@ -118,7 +120,7 @@ const removeGiveaway = async (req, res, next) => {
         if(!id) throw new Exception('invalid id')
         const giveaway = await Giveaway.findByIdAndDelete(id)
         if(!giveaway) throw new Exception('giveaway not found')
-        return res.status(httpCodes.OK).send({message: 'giveaway removed'})
+        return res.status(httpCodes.OK).send({npm: 'giveaway removed'})
     } catch (error) {
         next(error)
     }
