@@ -5,7 +5,7 @@ const { Exception } = require('../utils');
 const addCategory = async (req, res, next) =>  {
     try {
         const { name } = req.body
-        if(name) throw new Exception('invalid name')
+        if(!name) throw new Exception('invalid name')
         const category = new Category({name})
         await category.save()
         res.status(httpCodes.OK).send({category})
