@@ -10,7 +10,7 @@ const giveawayResultSchema = new Schema({
 	},
 	winningNumbers: {
 		type: Number,
-		min: 0
+		min: 1
     },
     winnerInfo: {
         fullname: String,
@@ -62,7 +62,6 @@ const giveawaySchema = new Schema({
 		validate: {
 			validator: (v) => {
 				const now = new Date()
-				console.log(v, now);
 				return v > now ? true : false;
 			},
 			message: (props) => `${props.value} must be larger than current time!`
@@ -71,11 +70,12 @@ const giveawaySchema = new Schema({
 	end: {
 		type: Date,
 		validate: {
-			validator: (v) => {
-				console.log(v);
-				return v < Date.now() ? false : true;
+			validator: function(v) {
+				const begin = this.begin
+				console.log(v, begin)
+				return v > begin ? true : false;
 			},
-			message: (props) => `${props.value} must be larger than current time!`
+			message: (props) => `${props.value} must be larger than begin!`
 		}
 	},
 	numParticipants: {

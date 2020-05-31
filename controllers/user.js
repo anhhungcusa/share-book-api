@@ -45,7 +45,7 @@ const getGiveawaysOfUser = async (req, res, next) => {
         skip = skip ? +skip : 0
 		if(!id) throw new Exception('invalid id')
 		const giveaways  = await Giveaway.find({byUser: id}, null, {limit, skip})
-			.populate('category')
+			.populate('category').sort({_id: -1})
 		if(!giveaways) throw new Exception('giveaway not found');
 		return res.status(httpCodes.OK).send({giveaways})
 	} catch (error) {

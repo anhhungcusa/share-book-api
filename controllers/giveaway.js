@@ -51,9 +51,9 @@ const startGiveaway = async (req, res, next) => {
         const numParticipants = giveaway.numParticipants
         const winningNumbers = randomInRange(1 , numParticipants)
         const winner = await GiveawayRegistration.findOne({giveawayId: giveaway._id, luckyNumber: winningNumbers})
-        const giveawayResult = new giveawayResultSchema({
+        const giveawayResult = {
             winningNumbers: winningNumbers
-        })
+        }
         if(winner) {
             giveawayResult.winnerEmail = winner.email
         }
