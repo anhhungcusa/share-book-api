@@ -13,7 +13,6 @@ const port = env.PORT
 createConnection();
 
 // middlewares
-app.use(express.static("public"));
 app.use(bodyParse.json());
 app.use(cors());
 

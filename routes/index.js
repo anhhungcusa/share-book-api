@@ -4,10 +4,10 @@ const category = require('./category')
 const giveaway = require('./giveaway')
 const registration = require('./registration')
 module.exports = (app) =>  {
-    app.use('auth', auth)
-    app.use('users', user)
-    app.use('categories', category)
-    app.use('giveaways', giveaway)
-    app.use('registrations', registration)
-
+    const prefix = '/api/v1'
+    app.use(`${prefix}/auth`, auth)
+    app.use(`${prefix}/users`, user)
+    app.use(`${prefix}/categories`, category)
+    app.use(`${prefix}/giveaways`, giveaway)
+    app.use(`${prefix}/registrations`, registration)
 }
