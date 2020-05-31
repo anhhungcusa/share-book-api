@@ -28,6 +28,9 @@ const addGiveaway = async (req, res, next) => {
 const registerReceiveGiveaway = async (req, res, next) => {
     try {
         const {email, luckyNumber, giveawayId} = req.body
+        // check register email is existed
+        const isExisted = await GiveawayRegistration.exists({email, giveawayId})
+        if(isExisted) throw new Exception('email existed')
         const registration = new GiveawayRegistration({email, luckyNumber, giveawayId})
         const giveaway  = await Giveaway.findById(id)
         if(giveaway.result) {
