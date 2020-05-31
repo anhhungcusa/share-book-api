@@ -61,8 +61,9 @@ const giveawaySchema = new Schema({
 		type: Date,
 		validate: {
 			validator: (v) => {
-				console.log(v);
-				return v < Date.now() ? false : true;
+				const now = new Date()
+				console.log(v, now);
+				return v > now ? true : false;
 			},
 			message: (props) => `${props.value} must be larger than current time!`
 		}
