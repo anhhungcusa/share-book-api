@@ -11,7 +11,7 @@ const addGiveaway = async (req, res, next) => {
             giftImg, giftTitle, 
             begin, numParticipants
         } = req.body
-        const byUser = req.user._id
+        const byUser = req.auth._id
         const giveaway = new Giveaway({
             byUser, category: categoryId,
             title, description,
@@ -91,7 +91,7 @@ const getGiveaways = async (req, res, next) => {
     try {
         let {limit, skip, categoryId, ended} = req.params
         limit = limit ? +limit : 5 
-        skip = skip ? +skip : 5 
+        skip = skip ? +skip : 0
         let query = {result: {$exists: ended ? true : false}}
         if(categoryId) query.category = categoryId
         const giveaways = await Giveaway.find(query, null, {skip, limit})

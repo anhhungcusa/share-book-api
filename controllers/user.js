@@ -42,7 +42,7 @@ const getGiveawaysOfUser = async (req, res, next) => {
 		const {id}  = req.params
 		let {limit, skip} = req.body
         limit = limit ? +limit : 5 
-        skip = skip ? +skip : 5 
+        skip = skip ? +skip : 0
 		if(!id) throw new Exception('invalid id')
 		const giveaways  = await Giveaway.find({byUser: id}, null, {limit, skip})
 			.populate('category')
