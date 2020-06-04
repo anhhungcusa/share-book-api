@@ -5,7 +5,6 @@ const giveawayRegistrationSchema =  new Schema({
     email: {
         type: String,
         required: true,
-        unique: true,
         maxLength: 64,
         minLength:3,
         validate: [isEmail, 'invalid email']

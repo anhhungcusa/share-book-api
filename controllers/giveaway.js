@@ -1,25 +1,25 @@
 const Giveaway = require('../models/giveaway')
-const {giveawayResultSchema} = require('../models/giveaway')
 const GiveawayRegistration = require('../models/giveaway-registration')
 const { Exception, randomInRange } = require('../utils');
 const { httpCodes } = require('../utils/constant');
-
+const sgMail = require('../config/sendgrid')
+const {env} = require('../config/globals')
 const addGiveaway = async (req, res, next) => {
     try {
         const {
-            categoryId, title, description, 
-            giftImg, giftTitle, 
+            categoryId, title, description,
+            giftImg, giftTitle,
             begin, numParticipants
         } = req.body
         const byUser = req.auth._id
         const giveaway = new Giveaway({
             byUser, category: categoryId,
             title, description,
-            gift: {image: giftImg, title: giftTitle},
+            gift: { image: giftImg, title: giftTitle },
             begin, numParticipants
         })
         await giveaway.save()
-		res.status(httpCodes.OK).send({ giveaway });
+        res.status(httpCodes.OK).send({ giveaway });
     } catch (error) {
         next(error)
     }
@@ -27,40 +27,73 @@ const addGiveaway = async (req, res, next) => {
 
 const registerReceiveGiveaway = async (req, res, next) => {
     try {
-        const {email, luckyNumber, giveawayId} = req.body
+        const { email, luckyNumber, giveawayId } = req.body
         // check register email is existed
-        const isExisted = await GiveawayRegistration.exists({email, giveawayId})
-        if(isExisted) throw new Exception('email existed')
-        const registration = new GiveawayRegistration({email, luckyNumber, giveawayId})
-        const giveaway  = await Giveaway.findById(id)
-        if(giveaway.result) {
+        const isExisted = await GiveawayRegistration.exists({ email, giveawayId })
+        if (isExisted) throw new Exception('email existed')
+        const registration = new GiveawayRegistration({ email, luckyNumber, giveawayId })
+        const giveaway = await Giveaway.findById(giveawayId)
+        if (giveaway.result) {
             throw new Exception('giveaway has ended')
         }
         await registration.save()
-        return res.status(httpCodes.OK).send({registration})
+        return res.status(httpCodes.OK).send({ registration })
     } catch (error) {
         next(error)
     }
 }
 
+
 const startGiveaway = async (req, res, next) => {
     try {
-        const {id} = req.params
-        const giveaway  = await Giveaway.findById(id)
-        if(!giveaway) throw new Exception('giveaway not found', httpCodes.NOT_FOUND)
+        const { id } = req.params
+        const {href} = req.query
+        if(!href) throw new Exception('invalid href')
+        const giveaway = await Giveaway.findById(id)
+        if (!giveaway) throw new Exception('giveaway not found', httpCodes.NOT_FOUND)
         const numParticipants = giveaway.numParticipants
-        const winningNumbers = randomInRange(1 , numParticipants)
-        const winner = await GiveawayRegistration.findOne({giveawayId: giveaway._id, luckyNumber: winningNumbers})
+        const winningNumbers = 1 || randomInRange(1, numParticipants)
+        const winner = await GiveawayRegistration.findOne({ giveawayId: giveaway._id, luckyNumber: winningNumbers })
         const giveawayResult = {
             winningNumbers: winningNumbers
         }
-        if(winner) {
+        if (winner) {
             giveawayResult.winnerEmail = winner.email
+            const msg = {
+                to: winner.email,
+                from: "nguyenvy3681@gmail.com",
+                subject: "[Share Book] Congratulations on receiving giveaway gifts ",
+                text: "text",
+                html: `
+                <div>
+                    <p>
+                        Congratulation! Please access this <a href="${href}?giveawayId=${giveaway._id}" target="_blank" rel="noopener noreferrer"> link</a>  to register the reward information, 
+                        after successful registration we will contact you via the phone number you registered.
+                    </p>
+                    <div>
+                        <b>Gift detail</b>
+                    </div>
+                    <div>
+                        <p> <b>gift name: </b> ${giveaway.gift.name} </p>
+                        <p> <b>gift image: </b></p>
+                        <img src=${giveaway.gift.image} alt="gift" 
+                            style='max-width:400px; height: auto;'
+                         />
+                    </div>
+                    <div>
+                        <b>Thanks &amp; Best Regards</b>
+                    </div>
+                </div>   
+                `
+                    
+            };
+            await sgMail.send(msg).then(_ => console.log(' send email successful'));
+        
         }
         giveaway.result = giveawayResult
         giveaway.end = new Date()
         await giveaway.save()
-		res.status(httpCodes.OK).send({ giveaway });
+        res.status(httpCodes.OK).send({ giveaway });
     } catch (error) {
         next(error)
     }
@@ -68,20 +101,20 @@ const startGiveaway = async (req, res, next) => {
 
 const updateWinnerInfo = async (req, res, next) => {
     try {
-        const {id} = req.params
-        const {fullname, address, phone, email} = req.body
-        if(!fullname || !address || !phone || !email) 
+        const { id } = req.params
+        const { fullname, address, phone, email } = req.body
+        if (!fullname || !address || !phone || !email)
             throw new Exception('invalid info')
         const giveaway = await Giveaway.findById(id)
-        if(!giveaway) 
+        if (!giveaway)
             throw new Exception('giveaway not found', httpCodes.NOT_FOUND)
-        if(giveaway.result.winnerInfo) 
+        if (giveaway.result.winnerInfo)
             throw new Exception('winner info registered')
-        if(giveaway.result.winnerEmail !== email) 
+        if (giveaway.result.winnerEmail !== email)
             throw new Exception('invalid email')
-        giveaway.result.winnerInfo = {fullname, address, phone}
+        giveaway.result.winnerInfo = { fullname, address, phone }
         await giveaway.save()
-        return res.status(httpCodes.OK).send({message: 'register winner info successful'})
+        return res.status(httpCodes.OK).send({ message: 'register winner info successful' })
     } catch (error) {
         next(error)
     }
@@ -89,17 +122,19 @@ const updateWinnerInfo = async (req, res, next) => {
 
 const getGiveaways = async (req, res, next) => {
     try {
-        let {limit, skip, categoryId, ended} = req.params
-        limit = limit ? +limit : 5 
+        let { limit, skip, categoryId, ended } = req.query
+        limit = limit ? +limit : 5
         skip = skip ? +skip : 0
-        let query = {result: {$exists: ended ? true : false}}
-        if(categoryId) query.category = categoryId
-        const giveaways = await Giveaway.find(query, null, {skip, limit})
+        let query = {}
+        if (ended) query.result = { $exists: ended ? true : false }
+        if (categoryId) query.category = categoryId
+        const giveaways = await Giveaway.find(query, null, { skip, limit })
             .populate('byUser', 'username')
-            .populate('category')
+            .populate('category', '_id name')
+            .sort({ begin: 1 })
             .exec()
-        if(!giveaways) throw new Exception('giveaway not found')
-        return res.status(httpCodes.OK).send({giveaways})
+        if (!giveaways) throw new Exception('giveaway not found')
+        return res.status(httpCodes.OK).send({ giveaways })
     } catch (error) {
         next(error)
     }
@@ -107,11 +142,12 @@ const getGiveaways = async (req, res, next) => {
 
 const getRegistrationsOfGiveaway = async (req, res, next) => {
     try {
-        const {id} = req.params
-        if(!id) throw new Exception('invalid id')
-        const registrations = await GiveawayRegistration.find({giveawayId: id})
-        if(!registrations) throw new Exception('registration not found')
-        return res.status(httpCodes.OK).send({registrations})
+        console.log(req.params)
+        const { id } = req.params
+        if (!id) throw new Exception('invalid id')
+        const registrations = await GiveawayRegistration.find({ giveawayId: id })
+        if (!registrations) throw new Exception('registration not found')
+        return res.status(httpCodes.OK).send({ registrations })
     } catch (error) {
         next(error)
     }
@@ -119,11 +155,11 @@ const getRegistrationsOfGiveaway = async (req, res, next) => {
 
 const removeGiveaway = async (req, res, next) => {
     try {
-        const {id} = req.params
-        if(!id) throw new Exception('invalid id')
+        const { id } = req.params
+        if (!id) throw new Exception('invalid id')
         const giveaway = await Giveaway.findByIdAndDelete(id)
-        if(!giveaway) throw new Exception('giveaway not found')
-        return res.status(httpCodes.OK).send({npm: 'giveaway removed'})
+        if (!giveaway) throw new Exception('giveaway not found')
+        return res.status(httpCodes.OK).send({ npm: 'giveaway removed' })
     } catch (error) {
         next(error)
     }
