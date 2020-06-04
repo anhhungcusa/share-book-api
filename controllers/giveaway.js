@@ -52,7 +52,7 @@ const startGiveaway = async (req, res, next) => {
         const giveaway = await Giveaway.findById(id)
         if (!giveaway) throw new Exception('giveaway not found', httpCodes.NOT_FOUND)
         const numParticipants = giveaway.numParticipants
-        const winningNumbers = 1 || randomInRange(1, numParticipants)
+        const winningNumbers = randomInRange(1, numParticipants)
         const winner = await GiveawayRegistration.findOne({ giveawayId: giveaway._id, luckyNumber: winningNumbers })
         const giveawayResult = {
             winningNumbers: winningNumbers
