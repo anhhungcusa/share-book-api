@@ -40,9 +40,9 @@ const getUserById = async (req, res, next) => {
 const getGiveawaysOfUser = async (req, res, next) => {
 	try {
 		const {id}  = req.params
-		let {limit, skip} = req.body
+		let {limit, skip} = req.query
         limit = limit ? +limit : 5 
-        skip = skip ? +skip : 0
+		skip = skip ? +skip : 0
 		if(!id) throw new Exception('invalid id')
 		const giveaways  = await Giveaway.find({byUser: id}, null, {limit, skip})
 			.populate('category').sort({_id: -1})
@@ -53,8 +53,18 @@ const getGiveawaysOfUser = async (req, res, next) => {
 	}
 }
 
+const mockUpload = (req, res) => {
+	res.status(httpCodes.OK).send({
+		"name": "xxx.png",
+		"status": "done",
+		"url": "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png",
+		"thumbUrl": "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+	})
+}
+
 module.exports = {
 	registerUser,
 	getUserById,
-	getGiveawaysOfUser
+	getGiveawaysOfUser,
+	mockUpload
 }
