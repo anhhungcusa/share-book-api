@@ -17,6 +17,9 @@ const giveawayRegistrationSchema =  new Schema({
         type: Schema.Types.ObjectId,
         required: true,
         index: true
+    },
+    createdAt: {
+        type: Date
     }
 })
 

@@ -2,8 +2,7 @@ const Giveaway = require('../models/giveaway')
 const GiveawayRegistration = require('../models/giveaway-registration')
 const { Exception, randomInRange } = require('../utils');
 const { httpCodes } = require('../utils/constant');
-const sgMail = require('../config/sendgrid')
-const {env} = require('../config/globals')
+const sgMail = require('../services/mailer')
 const addGiveaway = async (req, res, next) => {
     try {
         const {
@@ -61,7 +60,7 @@ const startGiveaway = async (req, res, next) => {
             giveawayResult.winnerEmail = winner.email
             const msg = {
                 to: winner.email,
-                from: "nguyenvy3681@gmail.com",
+                from: "sharebook@zohomail.com",
                 subject: "[Share Book] Congratulations on receiving giveaway gifts ",
                 text: "text",
                 html: `
@@ -142,11 +141,13 @@ const getGiveaways = async (req, res, next) => {
 
 const getRegistrationsOfGiveaway = async (req, res, next) => {
     try {
-        console.log(req.params)
         const { id } = req.params
         if (!id) throw new Exception('invalid id')
-        const registrations = await GiveawayRegistration.find({ giveawayId: id })
+        let registrations = await GiveawayRegistration.find({ giveawayId: id })
         if (!registrations) throw new Exception('registration not found')
+        registrations.forEach(doc => {
+            doc.createdAt = doc._id.getTimestamp()
+        })
         return res.status(httpCodes.OK).send({ registrations })
     } catch (error) {
         next(error)
