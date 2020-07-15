@@ -1,4 +1,4 @@
-# Share old book(BE)
+# Share book api
 
 ## Requirements
 
@@ -42,4 +42,4 @@ npm run dev
 
 ## Font-end
 
-[github](https://github.com/learn-in-codersx/share-old-book-client.git)
+[github](https://github.com/anhhungcusa/share-book-react)
